@@ -22,7 +22,7 @@ data/interim/
 
 !data/processed/
 !data/processed/*.csv
-!data/processed/*.npz
+data/processed/*.npz
 
 models/*.h5
 models/*.joblib
@@ -30,7 +30,7 @@ models/*.pth
 models/*.onnx
 models/*.sav
 
-!models/*.pkl
+models/*.pkl
 
 .env
 .env.*
