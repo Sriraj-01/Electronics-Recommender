@@ -1,13 +1,13 @@
-from flask import Flask, jsonify, render_template, request
+from flask import Flask, render_template, request
 import pandas as pd
 from scipy.sparse import load_npz
-import pickle
-from src.recommender_cf import CollaborativeRecommender
-from src.recommender_content import ContentRecommender
-from src.recommender_hybrid import HybridRecommender
 import os
 import urllib.request
 import zipfile
+
+from src.recommender_cf import CollaborativeRecommender
+from src.recommender_content import ContentRecommender
+from src.recommender_hybrid import HybridRecommender
 
 app = Flask(
     __name__,
@@ -15,10 +15,12 @@ app = Flask(
     static_folder="app/static"
 )
 
-MODEL_URL = "https://drive.google.com/file/d/1wVdfLyY1TI8KgFUEtHrF6PBTFYq052AN/view?usp=sharing"
+MODEL_URL = "https://drive.google.com/file/d/1cRIsqQXqjkywKUdGHi7HOsy_v4mA2j-V/view?usp=sharing?usp=download"
 ARTIFACT_ZIP = "model_artifacts.zip"
 
-if not os.path.exists("models") or not os.path.exists("data/processed"):
+REQUIRED_FILE = "models/als_model.pkl"
+
+if not os.path.exists(REQUIRED_FILE):
     print("Downloading model artifacts...")
     urllib.request.urlretrieve(MODEL_URL, ARTIFACT_ZIP)
     with zipfile.ZipFile(ARTIFACT_ZIP, "r") as zip_ref:
@@ -26,26 +28,24 @@ if not os.path.exists("models") or not os.path.exists("data/processed"):
     print("Model artifacts downloaded successfully.")
 
 df = pd.read_csv("data/processed/electronics_subset.csv")
-df = df[
-    ["asin", "reviewText", "overall"]
-]
-asin_to_Text = (
+df = df[["asin", "reviewText", "overall"]]
+
+asin_to_text = (
     df.dropna(subset=["reviewText"])
-    .groupby("asin")["reviewText"]
-    .first()
-    .to_dict()
+      .groupby("asin")["reviewText"]
+      .first()
+      .to_dict()
 )
 
 interactions = load_npz("data/processed/interactions.npz")
-
-def popular_items(df, top_n = 5):
+def popular_items(df, top_n=5):
     return (
         df.groupby("asin")["overall"]
-        .mean()
-        .sort_values(ascending=False)
-        .head(top_n)
-        .index
-        .tolist()
+          .mean()
+          .sort_values(ascending=False)
+          .head(top_n)
+          .index
+          .tolist()
     )
 
 cf = CollaborativeRecommender(
@@ -60,27 +60,36 @@ content = ContentRecommender(
     "models/product_text.pkl"
 )
 
-
 hybrid = HybridRecommender(cf, content)
+
 @app.route("/", methods=["GET"])
 def home():
     return render_template("index.html")
 
+
 @app.route("/recommend", methods=["POST"])
 def recommend():
     user_id = request.form.get("user_id")
+
     recommendations = hybrid.recommend(user_id, interactions, N=5)
+
     if not recommendations:
         recommendations = popular_items(df, top_n=5)
-        message = "New User! Here are some popular items"
+        message = "New user detected — showing popular items"
     else:
-        message = "Presonalized recommendations for you"
+        message = "Personalized recommendations for you"
+
     display_recommendations = [
-        f"{asin}: {asin_to_Text.get(asin, 'No reviewText available')[:120]}..."
+        f"{asin}: {asin_to_text.get(asin, 'No review text available')[:120]}..."
         for asin in recommendations
     ]
-    return render_template("results.html", user_id=user_id, recommendations=display_recommendations, message=message)
+
+    return render_template(
+        "results.html",
+        user_id=user_id,
+        recommendations=display_recommendations,
+        message=message
+    )
 
 if __name__ == "__main__":
-    app.run(debug=True)
-
+    app.run()
