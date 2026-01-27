@@ -5,12 +5,25 @@ import pickle
 from src.recommender_cf import CollaborativeRecommender
 from src.recommender_content import ContentRecommender
 from src.recommender_hybrid import HybridRecommender
+import os
+import urllib.request
+import zipfile
 
 app = Flask(
     __name__,
     template_folder="app/templates",
     static_folder="app/static"
 )
+
+MODEL_URL = "https://drive.google.com/file/d/1wVdfLyY1TI8KgFUEtHrF6PBTFYq052AN/view?usp=sharing"
+ARTIFACT_ZIP = "model_artifacts.zip"
+
+if not os.path.exists("models") or not os.path.exists("data/processed"):
+    print("Downloading model artifacts...")
+    urllib.request.urlretrieve(MODEL_URL, ARTIFACT_ZIP)
+    with zipfile.ZipFile(ARTIFACT_ZIP, "r") as zip_ref:
+        zip_ref.extractall(".")
+    print("Model artifacts downloaded successfully.")
 
 df = pd.read_csv("data/processed/electronics_subset.csv")
 df = df[
