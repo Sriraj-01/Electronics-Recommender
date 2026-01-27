@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Recommendations</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+
+<div class="container">
+    <h2>Recommendations</h2>
+
+    <p class="message">{{ message }}</p>
+    <p class="message"><b>User:</b> {{ user_id }}</p>
+
+    {% if recommendations %}
+        <ul>
+            {% for item in recommendations %}
+                <li>{{ item }}</li>
+            {% endfor %}
+        </ul>
+    {% else %}
+        <p class="message">No recommendations available.</p>
+    {% endif %}
+
+    <a href="/">Try another user</a>
+</div>
+
+</body>
+</html>

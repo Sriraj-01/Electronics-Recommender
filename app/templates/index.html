@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Amazon Electronics Recommender</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+
+<div class="container">
+    <h1>Amazon Electronics Recommendation System</h1>
+
+    <form action="/recommend" method="post">
+        <label for="user_id">Enter User ID</label>
+        <input type="text" name="user_id" placeholder="e.g. A3T0C6C1N2Z9J" required>
+        <button type="submit">Get Recommendations</button>
+    </form>
+</div>
+
+</body>
+</html>
