@@ -60,12 +60,11 @@ def load_artifacts():
     asin_to_text = (
         df.dropna(subset=["reviewText"])
           .groupby("asin")["reviewText"]
-          .first()
+          .apply(lambda x: x.iloc[0])
           .to_dict()
     )
 
-    with open("models/product_text.pkl", "rb") as f:
-        full_product_text = pickle.load(f)
+    
 
     interactions = load_npz("data/processed/interactions.npz")
 
@@ -97,11 +96,7 @@ def popular_items(df, top_n=5):
 
 
 def get_product_text(asin):
-    if asin in asin_to_text:
-        return asin_to_text[asin]
-    if asin in full_product_text:
-        return full_product_text[asin]
-    return "No description available"
+    return asin_to_text.get(asin, "No review text available")
 
 
 @app.route("/", methods=["GET"])
