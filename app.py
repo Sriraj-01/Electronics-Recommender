@@ -15,7 +15,7 @@ app = Flask(
     static_folder="app/static"
 )
 
-MODEL_URL = "https://drive.google.com/uc?export=download&id=1wVdfLyY1TI8KgFUEtHrF6PBTFYq052AN"
+MODEL_URL = "https://huggingface.co/Sriraj01/electronics-recommender-artifact/resolve/main/model_artifacts.zip?download=true"
 ARTIFACT_ZIP = "model_artifacts.zip"
 
 REQUIRED_FILE = "models/als_model.pkl"
