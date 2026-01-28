@@ -15,7 +15,7 @@ app = Flask(
     static_folder="app/static"
 )
 
-MODEL_URL = "https://drive.google.com/file/d/1cRIsqQXqjkywKUdGHi7HOsy_v4mA2j-V/view?usp=sharing?usp=download"
+MODEL_URL = "https://drive.google.com/uc?export=download&id=1wVdfLyY1TI8KgFUEtHrF6PBTFYq052AN"
 ARTIFACT_ZIP = "model_artifacts.zip"
 
 REQUIRED_FILE = "models/als_model.pkl"
@@ -23,8 +23,12 @@ REQUIRED_FILE = "models/als_model.pkl"
 if not os.path.exists(REQUIRED_FILE):
     print("Downloading model artifacts...")
     urllib.request.urlretrieve(MODEL_URL, ARTIFACT_ZIP)
+    if not zipfile.is_zipfile(ARTIFACT_ZIP):
+        raise RuntimeError("Downloaded artifact is not a valid ZIP file")
+
     with zipfile.ZipFile(ARTIFACT_ZIP, "r") as zip_ref:
-        zip_ref.extractall(".")
+      zip_ref.extractall(".")
+
     print("Model artifacts downloaded successfully.")
 
 df = pd.read_csv("data/processed/electronics_subset.csv")
